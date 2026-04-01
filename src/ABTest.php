@@ -121,8 +121,14 @@ final class ABTest
      * Evaluate multiple treatments against a single control.
      * Returns results sorted by p-value (most significant first).
      *
-     * @param Variant   $control    The baseline variant
-     * @param Variant[] $treatments Array of challenger variants
+     * When Bonferroni correction is enabled (default), each p-value is multiplied
+     * by the number of comparisons to control the family-wise error rate.
+     *
+     * @param Variant   $control     The baseline variant
+     * @param Variant[] $treatments  Array of challenger variants
+     * @param float     $significance Significance level (default 0.05)
+     * @param int       $minSampleSize Minimum observations per variant
+     * @param bool      $bonferroni  Apply Bonferroni correction (default true)
      * @return TestResult[]
      */
     public static function evaluateMultiple(
@@ -130,11 +136,69 @@ final class ABTest
         array $treatments,
         float $significance = self::DEFAULT_SIGNIFICANCE,
         int $minSampleSize = self::DEFAULT_MIN_SAMPLE,
+        bool $bonferroni = true,
     ): array {
         $results = array_map(
             fn (Variant $treatment) => self::evaluate($control, $treatment, $significance, $minSampleSize),
             $treatments,
         );
+
+        if ($bonferroni) {
+            $k = count($treatments);
+            $results = array_map(static function (TestResult $r) use ($k, $significance): TestResult {
+                $correctedP = min($r->pValue * $k, 1.0);
+                $isSignificant = $correctedP < $significance;
+
+                $winner = null;
+                $reason = sprintf(
+                    'p=%.4f (Bonferroni-corrected x%d), not significant at α=%.2f',
+                    $correctedP,
+                    $k,
+                    $significance,
+                );
+
+                if ($isSignificant) {
+                    $winner = $r->treatment->conversionRate > $r->control->conversionRate
+                        ? $r->treatment->name
+                        : $r->control->name;
+
+                    $reason = sprintf(
+                        '%s wins with %.2f%% vs %.2f%% (p=%.4f Bonferroni-corrected x%d, α=%.2f, lift=%s)',
+                        $winner,
+                        ($winner === $r->treatment->name ? $r->treatment->conversionRate : $r->control->conversionRate) * 100,
+                        ($winner === $r->treatment->name ? $r->control->conversionRate : $r->treatment->conversionRate) * 100,
+                        $correctedP,
+                        $k,
+                        $significance,
+                        sprintf('%+.2f%%', $r->lift * 100),
+                    );
+                }
+
+                // Handle insufficient data case — preserve original reason
+                if ($r->pValue === 1.0 && str_contains($r->reason, 'Insufficient data')) {
+                    $reason = $r->reason;
+                    $isSignificant = false;
+                    $winner = null;
+                }
+
+                // Handle identical rates case
+                if ($r->reason === 'Conversion rates are identical') {
+                    $reason = $r->reason;
+                }
+
+                return new TestResult(
+                    control: $r->control,
+                    treatment: $r->treatment,
+                    chiSquared: $r->chiSquared,
+                    pValue: $correctedP,
+                    significanceLevel: $significance,
+                    isSignificant: $isSignificant,
+                    winner: $winner,
+                    lift: $r->lift,
+                    reason: $reason,
+                );
+            }, $results);
+        }
 
         usort($results, fn (TestResult $a, TestResult $b) => $a->pValue <=> $b->pValue);
 
