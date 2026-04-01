@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Jekabs\AbStats\Tests;
 
 use Jekabs\AbStats\NormalDistribution;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class NormalDistributionTest extends TestCase
 {
-    /**
-     * @dataProvider knownValues
-     */
+    #[DataProvider('knownValues')]
     public function test_cdf_matches_known_values(float $z, float $expected, float $tolerance): void
     {
         $actual = NormalDistribution::cdf($z);
