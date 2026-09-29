@@ -15,7 +15,7 @@ namespace Jekabs\AbStats;
  *
  *   $result->isSignificant; // true/false
  *   $result->winner;        // 'B' or null
- *   $result->pValue;        // 0.0234...
+ *   $result->pValue;        // 0.054628...
  *   $result->liftPercent(); // '+25.00%'
  */
 final class ABTest

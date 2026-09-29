@@ -13,8 +13,11 @@ Zero-dependency PHP A/B testing statistics. Pure math, no frameworks, no externa
 
 ## Installation
 
+Install directly from the public Git repository with Composer. Packagist registration is pending.
+
 ```bash
-composer require jekabs/ab-stats
+composer config repositories.ab-stats vcs https://github.com/jecis-repos/ab-stats.git
+composer require jekabs/ab-stats:dev-main
 ```
 
 ## Usage
@@ -28,12 +31,12 @@ $result = ABTest::evaluate(
     treatment: Variant::make('Redesign', successes: 150, total: 1000),
 );
 
-$result->isSignificant;  // true
-$result->winner;          // 'Redesign'
-$result->pValue;          // 0.0234...
+$result->isSignificant;  // false (p >= 0.05)
+$result->winner;          // null
+$result->pValue;          // 0.054628...
 $result->liftPercent();   // '+25.00%'
-$result->chiSquared;      // 5.12...
-$result->reason;          // 'Redesign wins with 15.00% vs 12.00% (p=0.0234, α=0.05, lift=+25.00%)'
+$result->chiSquared;      // 3.600942...
+$result->reason;          // 'p=0.0546, not significant at α=0.05'
 ```
 
 ### Custom Significance Level

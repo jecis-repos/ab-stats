@@ -7,7 +7,7 @@ namespace Jekabs\AbStats;
 /**
  * Immutable result of a Bayesian A/B test comparison.
  */
-final readonly class BayesianResult
+final class BayesianResult
 {
     /**
      * @param Variant       $control
@@ -21,15 +21,15 @@ final readonly class BayesianResult
      * @param string        $reason                    Human-readable explanation
      */
     public function __construct(
-        public Variant $control,
-        public Variant $treatment,
-        public float $probabilityTreatmentWins,
-        public array $controlCredibleInterval,
-        public array $treatmentCredibleInterval,
-        public float $expectedLift,
-        public array $liftCredibleInterval,
-        public bool $isCredible,
-        public string $reason,
+        public readonly Variant $control,
+        public readonly Variant $treatment,
+        public readonly float $probabilityTreatmentWins,
+        public readonly array $controlCredibleInterval,
+        public readonly array $treatmentCredibleInterval,
+        public readonly float $expectedLift,
+        public readonly array $liftCredibleInterval,
+        public readonly bool $isCredible,
+        public readonly string $reason,
     ) {}
 
     public function toArray(): array
