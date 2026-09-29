@@ -7,18 +7,18 @@ namespace Jekabs\AbStats;
 /**
  * Immutable result of an A/B test comparison.
  */
-final readonly class TestResult
+final class TestResult
 {
     public function __construct(
-        public Variant $control,
-        public Variant $treatment,
-        public float $chiSquared,
-        public float $pValue,
-        public float $significanceLevel,
-        public bool $isSignificant,
-        public ?string $winner,
-        public float $lift,
-        public string $reason,
+        public readonly Variant $control,
+        public readonly Variant $treatment,
+        public readonly float $chiSquared,
+        public readonly float $pValue,
+        public readonly float $significanceLevel,
+        public readonly bool $isSignificant,
+        public readonly ?string $winner,
+        public readonly float $lift,
+        public readonly string $reason,
     ) {}
 
     /**

@@ -7,15 +7,15 @@ namespace Jekabs\AbStats;
 /**
  * Immutable value object representing one variant in an A/B test.
  */
-final readonly class Variant
+final class Variant
 {
-    public int $failures;
-    public float $conversionRate;
+    public readonly int $failures;
+    public readonly float $conversionRate;
 
     public function __construct(
-        public string $name,
-        public int $successes,
-        public int $total,
+        public readonly string $name,
+        public readonly int $successes,
+        public readonly int $total,
     ) {
         if ($total < 0) {
             throw new \InvalidArgumentException("Total must be non-negative, got {$total}");
